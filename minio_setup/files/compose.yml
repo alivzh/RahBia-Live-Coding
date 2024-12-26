@@ -1,0 +1,49 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  minio_data:
+    name: minio_data
+    external: false
+
+services:
+  minio:
+    image: minio/minio:${image_tag}
+    container_name: minio
+    hostname: minio
+    restart: ${restart_policy}
+    command: server --console-address ":9001" /data
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${minio_root_user}
+      MINIO_ROOT_PASSWORD: ${minio_root_pass}
+      MINIO_SERVER_URL: https://${minio_api_domain}
+      MINIO_BROWSER_REDIRECT_URL: https://${minio_console_domain}
+    networks:
+      - web_net
+      - app_net
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.http-io.rule=Host(`${minio_console_domain}`)"
+      - "traefik.http.routers.http-io.entrypoints=web"
+      - "traefik.http.routers.io.rule=Host(`${minio_console_domain}`)"
+      - "traefik.http.routers.io.entrypoints=web-secure"
+      - "traefik.http.routers.io.tls=true"
+      - "traefik.http.routers.io.tls.certresolver=myresolver"
+      - "traefik.http.routers.io.service=io"
+      - "traefik.http.services.io.loadBalancer.server.port=9001"
+      - "traefik.http.routers.http-min.rule=Host(`${minio_api_domain}`)"
+      - "traefik.http.routers.http-min.entrypoints=web"
+      - "traefik.http.routers.min.rule=Host(`${minio_api_domain}`)"
+      - "traefik.http.routers.min.entrypoints=web-secure"
+      - "traefik.http.routers.min.tls=true"
+      - "traefik.http.routers.min.tls.certresolver=myresolver"
+      - "traefik.http.routers.min.service=min"
+      - "traefik.http.services.min.loadBalancer.server.port=9000"

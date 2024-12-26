@@ -1,0 +1,8 @@
+---
+# traefik domain
+traefik_domain: "tra.{{ main_domain }}"
+
+# acme email for renew certificate
+traefik_acme_email: ahmad@MeCan.ir
+
+service_dir: "{{ project_dir }}/traefik"

@@ -1,0 +1,8 @@
+---
+service_dir: "{{ project_dir }}/minio"
+
+minio_image_tag: RELEASE.2024-11-07T00-52-20Z
+
+# minio domain
+minio_api_domain: "min.{{ main_domain }}"
+minio_console_domain: "io.{{ main_domain }}"

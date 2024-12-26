@@ -1,0 +1,107 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  gitlab_data:
+    name: gitlab_data
+  gitlab_log:
+    name: gitlab_log
+  gitlab_backup:
+    name: gitlab_backups
+  gitlab_config:
+    name: gitlab_config
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:${image_tag}
+    container_name: gitlab
+    hostname: ${gitlab_domain}
+    restart: ${restart_policy}
+    volumes:
+      - gitlab_data:/var/opt/gitlab
+      - gitlab_log:/var/log/gitlab
+      - gitlab_backup:/var/opt/gitlab/backups
+      - gitlab_config:/etc/gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        # Gitlab external domain
+        external_url 'https://${gitlab_domain}'
+
+        # Gitlab Root Password
+        gitlab_rails['initial_root_password'] = "${gitlab_root_pass}"
+        gitlab_rails['display_initial_root_password'] = false
+        gitlab_rails['store_initial_root_password'] = false
+
+        # Gitlab Nginx Config
+        nginx['enable'] = true
+        nginx['client_max_body_size'] = '250m'
+        nginx['redirect_http_to_https'] = false
+        nginx['gzip_enabled'] = true
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        nginx['proxy_protocol'] = false
+
+        # Gitlab ban authentication failed
+        gitlab_rails['rack_attack_git_basic_auth'] = {
+          'enabled' => true,
+          'ip_whitelist' => ["127.0.0.1","192.168.200.0/24","51.159.156.189"],
+          'maxretry' => 10,
+          'findtime' => 60,
+          'bantime' => 3600
+        }
+
+        # Gitlab Backup Settings
+        gitlab_rails['manage_backup_path'] = true
+        gitlab_rails['backup_path'] = "/var/opt/gitlab/backups"
+        gitlab_rails['backup_archive_permissions'] = 0644
+        gitlab_rails['backup_keep_time'] = 604800
+        gitlab_rails['env'] = {
+            "SKIP" => "registry"
+        }
+        # gitlab_rails['backup_upload_connection'] = {
+        #   'provider' => 'AWS',
+        #   'region' => 'eu-west-1',
+        #    'endpoint' => 'https://min.rahbia.mecan.ir',
+        #   'aws_access_key_id' => 'AKIAKIAKI',
+        #   'aws_secret_access_key' => 'secret123',
+        #   'use_iam_profile' => false
+        # }
+        # gitlab_rails['backup_upload_remote_directory'] = 'gitlab-backup'
+        # gitlab_rails['backup_multipart_chunk_size'] = 104857600
+
+        # Gitlab disable unused services
+        node_exporter['enable'] = false
+        redis_exporter['enable'] = false
+        postgres_exporter['enable'] = false
+        pgbouncer_exporter['enable'] = false
+        gitlab_exporter['enable'] = false
+        letsencrypt['enable'] = false
+        prometheus['enable'] = false
+        monitoring_role['enable'] = false
+        alertmanager['enable'] = false
+    networks:
+      - web_net
+      - app_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.http-git.rule=Host(`${gitlab_domain}`)"
+      - "traefik.http.routers.http-git.entrypoints=web"
+      - "traefik.http.routers.git.rule=Host(`${gitlab_domain}`)"
+      - "traefik.http.routers.git.entrypoints=web-secure"
+      - "traefik.http.routers.git.tls=true"
+      - "traefik.http.routers.git.tls.certresolver=myresolver"
+      - "traefik.http.routers.git.service=git"
+      - "traefik.http.services.git.loadBalancer.server.port=80"
+      - "traefik.http.routers.http-reg.rule=Host(`${registry_domain}`)"
+      - "traefik.http.routers.http-reg.entrypoints=web"
+      - "traefik.http.routers.reg.rule=Host(`${registry_domain}`)"
+      - "traefik.http.routers.reg.entrypoints=web-secure"
+      - "traefik.http.routers.reg.tls=true"
+      - "traefik.http.routers.reg.tls.certresolver=myresolver"
+      - "traefik.http.routers.reg.service=reg"
+      - "traefik.http.services.reg.loadBalancer.server.port=5001"

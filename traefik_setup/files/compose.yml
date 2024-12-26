@@ -1,0 +1,57 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  traefik_data:
+    name: traefik_data
+    external: false
+
+
+services:
+  traefik:
+    image: traefik:${image_tag}
+    container_name: traefik
+    hostname: traefik
+    restart: ${restart_policy}
+    command:
+      - "--log.level=INFO"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.network=web_net"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=web-secure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web-secure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${acme_email}"
+      - "--certificatesresolvers.myresolver.acme.storage=/certs/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "traefik_data:/certs"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - web_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.web-auth.basicauth.users=${web_auth_user}:${web_auth_pass}"
+      - "traefik.http.routers.http-khodesh.rule=Host(`${traefik_domain}`)"
+      - "traefik.http.routers.http-khodesh.entrypoints=web"
+      - "traefik.http.routers.khodesh.rule=Host(`${traefik_domain}`)"
+      - "traefik.http.routers.khodesh.entrypoints=web-secure"
+      - "traefik.http.routers.khodesh.middlewares=web-auth@docker"
+      - "traefik.http.routers.khodesh.tls=true"
+      - "traefik.http.routers.khodesh.tls.certresolver=myresolver"
+      - "traefik.http.services.khodesh.loadBalancer.server.port=8080"
+
+
+
+

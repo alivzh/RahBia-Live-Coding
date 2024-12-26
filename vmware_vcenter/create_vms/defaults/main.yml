@@ -1,0 +1,10 @@
+---
+# defaults file for vms_management
+DC_NAME: DockerMe-Labs
+ESXI_NAME: mesx.canme.ir
+VM_TEMPLATE: RahBia-Template
+NETWORK_NAME: local
+SUBNET_MASK: 255.255.255.0
+GATEWAY_ADDRESS: 192.168.200.1
+DNS_SERVER1: 8.8.8.8
+DNS_SERVER2: 4.2.2.4

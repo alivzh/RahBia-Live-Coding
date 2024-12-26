@@ -1,0 +1,41 @@
+---
+- name: Install parted
+  ansible.builtin.package:
+    name: parted
+    state: present
+
+- name: Read device information /dev/sda
+  parted:
+    device: "/dev/sda"
+    unit: KiB
+  register: device_info
+
+- name: Create a new primary partition for LVM
+  parted:
+    device: "/dev/sda"
+    number: "3"
+    part_type: primary
+    flags: [ lvm ]
+    label: msdos
+    state: present
+    part_start: "{{ device_info.partitions[1].end + 1}}KiB"
+    part_end: "100%"
+
+- name: Resize a volume group on top of /dev/sda3 and /dev/sda5.
+  community.general.lvg:
+    vg: vg0
+    pvs: /dev/sda3,/dev/sda5
+
+- name: Resize logical volume root
+  community.general.lvol:
+    vg: vg0
+    lv: lv-root
+    size: +20%FREE
+    resizefs: true
+
+- name: Resize logical volume root
+  community.general.lvol:
+    vg: vg0
+    lv: lv-var
+    size: +100%FREE
+    resizefs: true

@@ -1,0 +1,6 @@
+---
+- name: Delete VMs
+  import_tasks: delete_vms.yml
+  tags:
+    - delete_vms
+    - vms_management
