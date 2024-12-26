@@ -9,7 +9,8 @@ This live coding series is designed to guide you through each stage of a DevOps 
 Each session builds upon the previous one, allowing you to develop a deep understanding of each component in a DevOps environment. By the end, you’ll be equipped with the skills to handle a full production deployment.
 
 
-
+this is mine practice project and it would be great for you to go to the main repo :
+https://github.com/AhmadRafiee/RahBia-Live-Coding
 
 
 ### Here’s What We’ll Be Doing:
