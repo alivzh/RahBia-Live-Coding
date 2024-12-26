@@ -1,0 +1,5 @@
+# main domain address
+main_domain: rahbia.mecan.ir
+
+# main project directory
+project_dir: /opt/services

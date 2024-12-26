@@ -1,0 +1,6 @@
+- name: delete VMs
+  hosts: all
+  become: true
+  gather_facts: false
+  roles:
+    - { role: ../../roles/vmware_vcenter/delete_vms, tags: 'delete_vms' }

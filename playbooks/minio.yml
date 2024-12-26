@@ -1,0 +1,6 @@
+- name: install and configuration minio service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  roles:
+    - ../roles/minio_setup

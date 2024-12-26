@@ -1,0 +1,6 @@
+- name: create VMs
+  hosts: all
+  become: true
+  gather_facts: false
+  roles:
+    - { role: ../../roles/vmware_vcenter/create_vms, tags: 'create_vms' }

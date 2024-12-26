@@ -1,0 +1,34 @@
+- name: Create or clone the VM
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_API_HOST }}"
+    api_user: "{{ PROXMOX_API_USERNAME }}"
+    api_password: "{{ PROXMOX_API_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    name: "{{ MACHINE_NAME }}"
+    state: present
+    clone: "{{ CLONE_TEMPLATE_NAME }}"
+    timeout: "{{ PROXMOX_TIMEOUT }}"
+    onboot: "{{ START_ON_BOOT }}"
+    full: "{{ FULL_CLONE }}"
+    scsi:
+      scsi0: "{{ DISK_STORAGE }}:{{ DISK_SIZE }},format={{ DISK_FORMAT }}"
+  register: cloned_vm
+
+- name: Debug VM creation status
+  debug:
+    msg: "VM creation status: {{ cloned_vm }}"
+
+- name: Resize the existing disk
+  community.general.proxmox_disk:
+    api_host: "{{ PROXMOX_API_HOST }}"
+    api_user: "{{ PROXMOX_API_USERNAME }}"
+    api_password: "{{ PROXMOX_API_PASSWORD }}"
+    vmid: "{{ cloned_vm.vmid }}"
+    disk: "scsi0"
+    size: "{{ RESIZED_DISK_SIZE }}"
+    state: resized
+  register: resized_disk
+
+- name: Debug resized disk
+  debug:
+    msg: "Resized disk status: {{ resized_disk }}"

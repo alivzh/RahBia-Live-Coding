@@ -1,0 +1,9 @@
+---
+- name: create VMs
+  hosts: all
+  become: true
+  gather_facts: yes
+  vars_files:
+    - ../../roles/proxmox/group_vars/all.yml  # Adjust the path if necessary
+  roles:
+    - { role: ../../roles/proxmox/create_vm, tags: 'create_vms' }

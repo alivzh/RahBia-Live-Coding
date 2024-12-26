@@ -1,0 +1,25 @@
+#---
+## create_ssh_config.yml
+#- name: Ensure the .ssh directory exists
+#  file:
+#    path: "/home/{{ ansible_user }}/.ssh"
+#    state: directory
+#    mode: '0700'
+#  become: true
+#  become_user: "{{ ansible_user }}"
+#
+#- name: Add the SSH key to authorized_keys
+#  authorized_key:
+#    user: "{{ ansible_user }}"
+#    state: present
+#    key: "{{ ssh_key }}"
+#  become: true
+#  become_user: "{{ ansible_user }}"
+#
+#- name: Set proper permissions for authorized_keys
+#  file:
+#    path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+#    mode: '0600'
+#  become: true
+#  become_user: "{{ ansible_user }}"
+#
