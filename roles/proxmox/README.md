@@ -1,10 +1,8 @@
-# this repo is not ready at the moment !
-### and i should explain that this is a temp repository and its gonna be merged in [alivzh/DevOps/ansible](https://github.com/alivzh/DevOps)
-
 ## Reqs
 
 ```bash
-copyCodeBlock('<div>pip3 install proxmoxer</div>')
+pip3 install proxmoxer
+pip3 install requests
 ```
 
 ## To Do List
