@@ -1,11 +1,11 @@
 ---
-#- name: Prompt user to confirm VM deletion
-#  pause:
-#    prompt: >
-#      Are you sure you want to delete the VM "{{ MACHINE_NAME | upper }}" on node "{{ PROXMOX_NODE | upper }}"?
-#      This will delete ALL configurations, disks, and associated resources. (yes/no)
-#  register: confirm
-#  failed_when: confirm.user_input != "yes"
+- name: Prompt user to confirm VM deletion
+  pause:
+    prompt: >
+      Are you sure you want to delete the VM "{{ MACHINE_NAME | upper }}" on node "{{ PROXMOX_NODE | upper }}"?
+      This will delete ALL configurations, disks, and associated resources. (yes/no)
+  register: confirm
+  failed_when: confirm.user_input != "yes"
 
 - name: Delete the VM
   include_tasks: clean_up.yml

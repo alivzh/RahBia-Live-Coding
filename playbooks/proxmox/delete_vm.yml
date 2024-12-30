@@ -1,9 +1,29 @@
 ---
 - name: delete VMs
-  hosts: all
   become: true
   gather_facts: yes
   vars_files:
     - ../../roles/proxmox/group_vars/all.yml  # Adjust the path if necessary
-  roles:
-    - { role: ../../roles/proxmox/delete_vm, tags: 'delete_vms' }
+  hosts: proxmox
+
+  tasks:
+    - name: Delete VM for each entry in VMS list
+      include_role:
+        name: ../../roles/proxmox/delete_vm
+      loop: "{{ VMS }}"
+      loop_control:
+        loop_var: VM
+      vars:
+        MACHINE_NAME: "{{ VM.NAME }}"
+        VM_TAG: "{{ VM.TAG }}"
+        CLONE_TEMPLATE: "{{ VM.CLONE_TEMPLATE }}"
+        MEMORY_SIZE: "{{ VM.MEMORY }}"
+        CPU_CORES: "{{ VM.CPU_CORES }}"
+        CPU_SOCKETS: "{{ VM.CPU_SOCKETS }}"
+        CPU_THREADS: "{{ VM.CPU_THREADS }}"
+        MAC_ADDRESS: "{{ VM.MAC_ADDRESS }}"
+        DISK_SIZE: "{{ VM.DISK_SIZE }}"
+        RESIZED_DISK_SIZE: "{{ VM.RESIZED_DISK_SIZE }}"
+        START_ON_BOOT: "{{ VM.START_ON_BOOT }}"
+        FULL_CLONE: "{{ VM.FULL_CLONE }}"
+        HOST_IP: "{{ VM.HOST_IP }}"

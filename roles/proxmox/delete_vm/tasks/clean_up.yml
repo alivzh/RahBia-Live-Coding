@@ -40,6 +40,7 @@
     node: "{{ PROXMOX_NODE }}"
     vmid: "{{ vmid }}"
     state: stopped
+    force: yes
   when: vm_exists
 
 - name: Kill any process using the VM's logical volume

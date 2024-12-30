@@ -6,7 +6,8 @@
     node: "{{ PROXMOX_NODE }}"
     name: "{{ MACHINE_NAME }}"
     state: present
-    clone: "{{ CLONE_TEMPLATE_NAME }}"
+    clone: "{{ CLONE_TEMPLATE }}"
+    tags: "{{ VM_TAG }}"
     timeout: "{{ PROXMOX_TIMEOUT }}"
     onboot: "{{ START_ON_BOOT }}"
     full: "{{ FULL_CLONE }}"
@@ -16,7 +17,7 @@
 
 - name: Debug VM creation status
   debug:
-    msg: "VM creation status: {{ cloned_vm }}"
+    msg: "VM creation status for '{{ MACHINE_NAME }}': {{ cloned_vm }}"
 
 - name: Resize the existing disk
   community.general.proxmox_disk:
@@ -29,6 +30,6 @@
     state: resized
   register: resized_disk
 
-- name: Debug resized disk
+- name: Debug resized disk status
   debug:
-    msg: "Resized disk status: {{ resized_disk }}"
+    msg: "Resized disk status for '{{ MACHINE_NAME }}': {{ resized_disk }}"

@@ -137,9 +137,14 @@
       - "Full VM running status: {{ vm_running_status }}"
   when: vm_exists
 
+
+
 # Step 17: Include update_lvm.yml
-- name: Include update_lvm.yml
-  include_tasks: update_lvm.yml
+- name: Run tasks on the VM if needed
+  block:
+    - name: Include update_lvm.yml
+      include_tasks: update_lvm.yml
+  delegate_to: "{{ HOST_IP }}"  # Delegate the entire block to the VM
   when:
     - vm_exists
     - vm_running_status is defined

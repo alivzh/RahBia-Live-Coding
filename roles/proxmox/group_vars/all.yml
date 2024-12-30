@@ -1,4 +1,3 @@
-# Node configs
 PROXMOX_API_USERNAME: "root@pam"
 PROXMOX_API_PASSWORD: "PASSWORD"
 PROXMOX_API_HOST: "192.168.1.200"
@@ -8,27 +7,45 @@ PROXMOX_FORMAT: "qcow2"
 PROXMOX_TIMEOUT: 500
 PROXMOX_LVM_VOLUME_GROUP: "pve"
 
-# VM configs
-MACHINE_NAME: "zeus"
-CLONE_TEMPLATE_NAME: "RahBia-Template"
-MEMORY_SIZE: 2048 # MB
-CPU_CORES: 2
-CPU_SOCKETS: 1
-CPU_THREADS: 1
-MAC_ADDRESS: "00:00:00:00:02:02"
-DISK_SIZE: "7G" # GB
+# VM list with configuration for each VM
+VMS:
+  - NAME: "zeus"
+    TAG: "abas"
+    CLONE_TEMPLATE: "RahBia-Template"
+    MEMORY: 2048
+    CPU_CORES: 2
+    CPU_SOCKETS: 1
+    CPU_THREADS: 1
+    MAC_ADDRESS: "00:00:00:00:02:02"
+    DISK_SIZE: "7G"
+    RESIZED_DISK_SIZE: "20G"
+    START_ON_BOOT: false
+    FULL_CLONE: true
+    HOST_IP: "RahBia-Template1"
 
-RESIZED_DISK_SIZE: "20G"  # Desired size for the resized disk
+  - NAME: "hera"
+    TAG: "abas"
+    CLONE_TEMPLATE: "RahBia-Template"
+    MEMORY: 4096
+    CPU_CORES: 4
+    CPU_SOCKETS: 2
+    CPU_THREADS: 2
+    MAC_ADDRESS: "00:00:00:00:02:03"
+    DISK_SIZE: "10G"
+    RESIZED_DISK_SIZE: "30G"
+    START_ON_BOOT: true
+    FULL_CLONE: true
+    HOST_IP: "RahBia-Template2"
 
-
+# Global disk and network settings
 DISK_STORAGE: "{{ PROXMOX_STORAGE }}"
 DISK_FORMAT: "{{ PROXMOX_FORMAT }}"
 DISK_TYPE: "scsi"
-LVM_VOLUME_GROUP: "lvm"   # Replace with your volume group name
-LVM_LOGICAL_VOLUME: "root" # Replace with your logical volume name
-
+LVM_VOLUME_GROUP: "lvm"
+LVM_LOGICAL_VOLUME: "root"
 NETWORK_INTERFACE_MODEL: "virtio"
 NETWORK_BRIDGE: "vmbr0"
 
-START_ON_BOOT: false
-FULL_CLONE: true
+
+
+
