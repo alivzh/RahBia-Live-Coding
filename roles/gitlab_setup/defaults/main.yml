@@ -1,0 +1,21 @@
+---
+# main project directory
+project_dir: /opt/services
+# minio project directory
+service_dir: "{{ project_dir }}/gitlab"
+
+# restart policy
+GITLAB_RESTART_POLICY: always
+
+# minio image tag
+GITLAB_IMAGE_TAG: 17.7.0-ce.0
+
+# minio root access
+GITLAB_ROOT_USER: admin
+GITLAB_ROOT_PASSWORD: wqd/4dp6SZaSLj33U5ng7ujXETpHqC6fWAoHG5fS
+# openssl rand -base64 30
+
+# minio domain
+MAIN_DOMAIN: aliveland.ir
+GITLAB_DOMAIN: "gitlab.{{ MAIN_DOMAIN }}"
+GITLAB_REGISTRY_DOMAIN: "reg.{{ MAIN_DOMAIN }}"

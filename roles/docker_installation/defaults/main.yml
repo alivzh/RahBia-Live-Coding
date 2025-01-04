@@ -28,6 +28,9 @@ docker_repo:
   gpg_url: https://repo.mecan.ir/repository/debian-docker/gpg   # https://download.docker.com/linux/ubuntu/gpg
   repo_url: https://repo.mecan.ir/repository/debian-docker/     # https://download.docker.com/linux/
 
+
+
+
 docker_config:
   proxy:
     enable: false

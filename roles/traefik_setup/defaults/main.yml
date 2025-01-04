@@ -1,0 +1,37 @@
+---
+# main project directory
+project_dir: /opt/services
+
+# traefik project directory
+service_dir: "{{ project_dir }}/traefik"
+
+
+# restart policy
+TRAEFIK_RESTART_POLICY: always
+# minio image tag
+TRAEFIK_IMAGE_TAG: v3.2
+
+# traefik_domain
+MAIN_DOMAIN: aliveland.ir
+TRAEFIK_DOMAIN: "tra.{{ MAIN_DOMAIN }}"
+
+# acme email for renew certification
+TRAEFIK_ACME_EMAIL: ali.vzh.1387.123@gmail.com
+# CloudFlare MAIN_DOMAIN API TOKEN :
+# IT SHOULD HAVE ALL DNS ZONE AND ... PERMISSIONS !
+CF_DNS_API_TOKEN: xpn5cC-kG3gpXo1elijNxZN3hAy43jS19tjybCOr
+
+# web-auth user:pass
+WEB_AUTH_USER: admin
+WEB_AUTH_PASS: $$apr1$$Fg0noS9a$$eIthM7D.iNoo5hmnP64Om/
+
+# Declaring the user list !
+#
+# Note: when used in docker-compose.yml all dollar signs in the hash need to be doubled for escaping.
+# To create a user:password pair, the following command can be used:
+# echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
+#
+# Also note that dollar signs should NOT be doubled when they not evaluated (e.g. Ansible docker_container module).
+
+
+

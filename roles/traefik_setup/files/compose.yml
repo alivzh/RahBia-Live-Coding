@@ -1,0 +1,75 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  traefik_data:
+    name: traefik_data
+    external: false
+
+services:
+  traefik:
+    image: traefik:${IMAGE_TAG} # Use the latest or a specific version of the Traefik image
+    container_name: traefik
+    hostname: traefik
+    restart: ${RESTART_POLICY} # Restart policy defined in the .env file
+    command:
+      # Logging and API settings
+      - "--log.level=DEBUG" # Enable debug-level logging
+      - "--api.dashboard=true" # Enable the Traefik dashboard
+      - "--api.insecure=true" # Allow insecure access to the dashboard (remove in production)
+
+      # Docker provider settings
+      - "--providers.docker=true" # Enable Docker provider
+      - "--providers.docker.network=web_net" # Default network for Docker containers
+      - "--providers.docker.exposedbydefault=false" # Do not expose all containers by default
+
+      # EntryPoints
+      - "--entrypoints.web.address=:80" # HTTP entry point
+      - "--entrypoints.web-secure.address=:443" # HTTPS entry point
+
+      # TLS certificates resolver using DNS challenge with Cloudflare
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true" # Use DNS challenge
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare" # Cloudflare provider
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.resolvers=1.1.1.1:53" # Cloudflare DNS resolver
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}" # Email for Let's Encrypt
+      - "--certificatesresolvers.myresolver.acme.storage=/certs/acme.json" # Store certificates in the mounted volume
+      - "--certificatesresolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory" # Use staging environment for testing-Debuging
+      # Disable in production
+      # Access log settings
+      - "--accesslog=true" # Enable access logging for debugging
+
+    ports:
+      - "80:80" # Expose HTTP port
+      - "443:443" # Expose HTTPS port
+    volumes:
+      - "traefik_data:/certs" # Persist ACME certificates
+      - "/var/run/docker.sock:/var/run/docker.sock:ro" # Read-only access to the Docker socket
+    networks:
+      - web_net
+      - app_net
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN} # Token for Cloudflare DNS API
+    labels:
+      - "traefik.http.middlewares.auth.basicauth.users=${WEB_AUTH_USER}:${WEB_AUTH_PASS}"
+
+
+      # Enable Traefik for this service
+      - "traefik.enable=true"
+
+      # HTTP Router
+      - "traefik.http.routers.http-khodesh.rule=Host(`${TRAEFIK_DOMAIN}`)" # Match the host for HTTP traffic
+      - "traefik.http.routers.http-khodesh.entrypoints=web" # Route HTTP traffic to the web entry point
+      - "traefik.http.routers.khodesh.middlewares=auth@docker" # HTTP auth
+
+      # HTTPS Router
+      - "traefik.http.routers.khodesh.rule=Host(`${TRAEFIK_DOMAIN}`)" # Match the host for HTTPS traffic
+      - "traefik.http.routers.khodesh.tls=true" # Enable TLS for this router
+      - "traefik.http.routers.khodesh.entrypoints=web-secure" # Route HTTPS traffic to the web-secure entry point
+      - "traefik.http.routers.http-khodesh.middlewares=auth@docker" # HTTPS auth
+      - "traefik.http.routers.khodesh.tls.certresolver=myresolver" # Use the DNS challenge resolver for HTTPS
+      - "traefik.http.services.khodesh.loadBalancer.server.port=8080" # Default backend port for the service

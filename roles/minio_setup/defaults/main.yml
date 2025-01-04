@@ -1,0 +1,21 @@
+---
+# main project directory
+project_dir: /opt/services
+# minio project directory
+service_dir: "{{ project_dir }}/minio"
+
+# restart policy
+MINIO_RESTART_POLICY: always
+
+# minio root access
+MINIO_ROOT_USER: admin
+MINIO_ROOT_PASSWORD: wqd/4dp6SZaSLj33U5ng7ujXETpHqC6fWAoHG5fS
+
+# minio domain
+MAIN_DOMAIN: aliveland.ir
+MINIO_API_DOMAIN: "api.{{ MAIN_DOMAIN }}"
+MINIO_CONSOLE_DOMAIN: "console.{{ MAIN_DOMAIN }}"
+
+
+# minio image tag
+MINIO_IMAGE_TAG: RELEASE.2024-11-07T00-52-20Z

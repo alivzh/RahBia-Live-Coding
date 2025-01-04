@@ -1,5 +1,5 @@
 PROXMOX_API_USERNAME: "root@pam"
-PROXMOX_API_PASSWORD: "PASSWORD"
+PROXMOX_API_PASSWORD: "pass"
 PROXMOX_API_HOST: "192.168.1.200"
 PROXMOX_NODE: "pve"
 PROXMOX_STORAGE: "local-lvm"
@@ -9,33 +9,48 @@ PROXMOX_LVM_VOLUME_GROUP: "pve"
 
 # VM list with configuration for each VM
 VMS:
-  - NAME: "zeus"
+
+  - NAME: "rahbia-services"
     TAG: "abas"
     CLONE_TEMPLATE: "RahBia-Template"
-    MEMORY: 2048
-    CPU_CORES: 2
+    MEMORY: 8192
+    CPU_CORES: 4
     CPU_SOCKETS: 1
     CPU_THREADS: 1
-    MAC_ADDRESS: "00:00:00:00:02:02"
+    MAC_ADDRESS: "00:00:00:00:02:01"
     DISK_SIZE: "7G"
-    RESIZED_DISK_SIZE: "20G"
+    RESIZED_DISK_SIZE: "100G"
     START_ON_BOOT: false
     FULL_CLONE: true
-    HOST_IP: "RahBia-Template1"
+    HOST_IP: "rahbia-services"
 
-  - NAME: "hera"
-    TAG: "abas"
-    CLONE_TEMPLATE: "RahBia-Template"
-    MEMORY: 4096
-    CPU_CORES: 4
-    CPU_SOCKETS: 2
-    CPU_THREADS: 2
-    MAC_ADDRESS: "00:00:00:00:02:03"
-    DISK_SIZE: "10G"
-    RESIZED_DISK_SIZE: "30G"
-    START_ON_BOOT: true
-    FULL_CLONE: true
-    HOST_IP: "RahBia-Template2"
+  # - NAME: "zeus"
+  #   TAG: "abas"
+  #   CLONE_TEMPLATE: "RahBia-Template"
+  #   MEMORY: 2048
+  #   CPU_CORES: 2
+  #   CPU_SOCKETS: 1
+  #   CPU_THREADS: 1
+  #   MAC_ADDRESS: "00:00:00:00:02:02"
+  #   DISK_SIZE: "7G"
+  #   RESIZED_DISK_SIZE: "20G"
+  #   START_ON_BOOT: false
+  #   FULL_CLONE: true
+  #   HOST_IP: "RahBia-Template1"
+
+  # - NAME: "hera"
+  #   TAG: "abas"
+  #   CLONE_TEMPLATE: "RahBia-Template"
+  #   MEMORY: 4096
+  #   CPU_CORES: 4
+  #   CPU_SOCKETS: 2
+  #   CPU_THREADS: 2
+  #   MAC_ADDRESS: "00:00:00:00:02:03"
+  #   DISK_SIZE: "10G"
+  #   RESIZED_DISK_SIZE: "30G"
+  #   START_ON_BOOT: true
+  #   FULL_CLONE: true
+  #   HOST_IP: "RahBia-Template2"
 
 # Global disk and network settings
 DISK_STORAGE: "{{ PROXMOX_STORAGE }}"

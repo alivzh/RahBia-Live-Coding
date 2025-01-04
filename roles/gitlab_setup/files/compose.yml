@@ -1,0 +1,55 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  gitlab_data:
+    name: gitlab_data
+
+  gitlab_log:
+    name: gitlab_log
+
+  gitlab_backup:
+    name: gitlab_backup
+
+  gitlab_config:
+    name: gitlab_config
+
+
+services:
+  minio:
+    image: gitlab/gitlab-ce:${IMAGE_TAG} # Use a specific version or latest image
+    container_name: gitlab
+    hostname: ${GITLAB_DOMAIN}
+    restart: ${RESTART_POLICY} # Restart policy defined in .env
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # MinIO API
+      - "9001:9001" # MinIO Console
+    volumes:
+      - gitlab_data:
+      - gitlab_log:
+      - gitlab_backup:
+      - gitlab_config:
+
+    environment:
+
+    networks:
+      - web_net
+      - app_net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.constraint-label=web_net
+
+      - traefik.http.routers.git.service=git
+      - traefik.http.routers.git.rule=Host(`${GITLAB_DOMAIN}`)
+      - traefik.http.services.git.loadbalancer.server.port=80
+      
+      - traefik.http.routers.reg.service=reg
+      - traefik.http.routers.reg.rule=Host(`${GITLAB_REGISTRY_DOMAIN}`)
+      - traefik.http.services.reg.loadbalancer.server.port=5001

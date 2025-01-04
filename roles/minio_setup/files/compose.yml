@@ -1,0 +1,45 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+volumes:
+  minio_data:
+    name: minio_data
+    external: false
+
+services:
+  minio:
+    image: minio/minio:${IMAGE_TAG} # Use a specific version or latest image
+    container_name: minio
+    hostname: minio
+    restart: ${RESTART_POLICY} # Restart policy defined in .env
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # MinIO API
+      - "9001:9001" # MinIO Console
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER} # Root username for MinIO
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD} # Root password for MinIO
+      MINIO_SERVER_URL: http://${MINIO_CONSOLE_DOMAIN} # API domain
+      NUBUI_BROWSER_REDIRECT_URL: http://${MINIO_API_DOMAIN} # Console redirect URL
+    networks:
+      - web_net
+      - app_net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.constraint-label=web_net
+
+      - traefik.http.routers.minio.service=minio
+      - traefik.http.routers.minio.rule=Host(`${MINIO_API_DOMAIN}`)
+      - traefik.http.services.minio.loadbalancer.server.port=9000
+      
+      - traefik.http.routers.minio-console.service=minio-console
+      - traefik.http.routers.minio-console.rule=Host(`${MINIO_CONSOLE_DOMAIN}`)
+      - traefik.http.services.minio-console.loadbalancer.server.port=9001
