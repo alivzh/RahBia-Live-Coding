@@ -1,0 +1,36 @@
+---
+- name: install docker dependencies
+  ansible.builtin.package:
+    name: "{{ docker_dependencies }}"
+    state: present
+    update_cache: true
+
+
+- block:
+    - name: Add apt signing key (Debian)
+      ansible.builtin.apt_key:
+        url: "{{ docker_repo.gpg_url }}"
+        state: present
+      become: true
+  rescue:
+    - name: retry adding apt signing key
+      ansible.builtin.wait_for:
+        timeout: 5
+    - name: Retry adding apt signing key
+      ansible.builtin.apt_key:
+        url: "{{ docker_repo.gpg_url }}"
+        state: present
+      become: true
+
+
+- name: install official docker repositories for debian based
+  ansible.builtin.template:
+    src: etc/apt/sources.list.d/docker-ce.list.j2
+    dest: /etc/apt/sources.list.d/docker-ce.list
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Update apt cache
+  ansible.builtin.command:
+    cmd: apt update

@@ -1,0 +1,9 @@
+---
+- name: Start the VM
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    vmid: "{{ vm_status.vmid }}"
+    state: started

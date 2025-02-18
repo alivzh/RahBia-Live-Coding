@@ -1,0 +1,9 @@
+- name: install and configuration traefik service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/traefik_setup/defaults/all/main.yml
+    - ../roles/traefik_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/traefik_setup

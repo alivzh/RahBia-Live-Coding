@@ -1,0 +1,9 @@
+- name: install and configuration nexus service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/nexus_setup/defaults/all/main.yml
+    - ../roles/nexus_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/nexus_setup

@@ -1,0 +1,9 @@
+- name: install and configuration minio service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/minio_setup/defaults/all/main.yml
+    - ../roles/minio_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/minio_setup

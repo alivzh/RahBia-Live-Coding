@@ -1,0 +1,37 @@
+---
+- name: Check if the blob store exists
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/blobstores/file/{{ item }}"
+    method: GET
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: 200
+  register: blob_check_response
+  ignore_errors: true
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_blob
+
+- name: Create blob store if it does not exist
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/blobstores/file"
+    method: POST
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+    body_format: json
+    body: >-
+      {
+        "name": "{{ item }}",
+        "path": "{{ item }}"
+      }
+    status_code: 204
+  when: blob_check_response.status == 404
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_blob

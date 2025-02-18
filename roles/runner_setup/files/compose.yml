@@ -1,0 +1,25 @@
+networks:
+  web_net:
+    name: web_net
+    external: true
+  app_net:
+    name: app_net
+    external: true
+
+
+volumes:
+  runner_data:
+    name: runner_data
+
+services:
+  runner:
+    image: gitlab/gitlab-runner:${RUNNER_IMAGE_TAG}
+    container_name: runner
+    hostname: ${RUNNER_DOMAIN}
+    restart:  ${RUNNER_RESTART_POLICY}
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "runner_data:/etc/gitlab-runner"
+    networks:
+      - app_net
+      - web_net

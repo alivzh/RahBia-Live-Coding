@@ -1,0 +1,6 @@
+# gitlab.rb ignore
+gitlab.rb
+# todo ignore
+todo
+# vault_pass ignore
+.vault_pass

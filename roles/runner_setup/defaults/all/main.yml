@@ -1,0 +1,17 @@
+---
+# main project directory
+project_dir: /opt/services
+# gitlab project directory
+service_dir: "{{ project_dir }}/runner"
+
+RUNNER_IMAGE_TAG: "v17.7.0"
+RUNNER_RESTART_POLICY: "unless-stopped"
+
+RUNNER_DOMAIN: "runner.aliveland.ir"
+
+runner:
+  default_image: docker:latest
+  name: rahbia-runner
+  endpoint: https://git.aliveland.ir
+  token: "{{ RUNNER_TOKEN }}"
+  concurrent: 5

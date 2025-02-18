@@ -1,0 +1,12 @@
+---
+- name: Setup Gitlab Service
+  import_tasks: gitlab_setup.yml
+  tags:
+    - install_gitlab
+    - setup_gitlab
+
+- name: Setup Backup Gitlab Service
+  import_tasks: gitlab_backup.yml
+  tags:
+    - backup_gitlab
+    - setup_gitlab
