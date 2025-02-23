@@ -2,10 +2,17 @@
 - name: Prompt user to confirm VM deletion
   pause:
     prompt: >
-      Are you sure you want to delete the VM "{{ MACHINE_NAME | upper }}" on node "{{ PROXMOX_NODE | upper }}"?
-      This will delete ALL configurations, disks, and associated resources. (y/n)
+      ⚠️- Are you sure you want to delete the VM "{{ MACHINE_NAME }}" on node "{{ PROXMOX_NODE }}"?
+      This will delete ALL configurations, disks, and associated resources.
+      Write Down the `"{{ MACHINE_NAME }}"` to proceed
+      (Type 'q' to cancel this VM and move to the next)
   register: confirm
-  failed_when: confirm.user_input != "y"
+
+- name: Skip this VM if 'q' is entered
+  debug:
+    msg: "Skipping deletion of VM {{ MACHINE_NAME }}"
+  when: confirm.user_input | lower == 'q'
 
 - name: Delete the VM
   include_tasks: clean_up.yml
+  when: confirm.user_input == MACHINE_NAME

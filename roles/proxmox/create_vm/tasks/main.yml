@@ -13,6 +13,7 @@
   changed_when: false
   tags:
     - start_vm
+    - poweroff
 
 # Step 2: Verify if VM exists based on the result
 - name: Verify if VM exists
@@ -20,6 +21,8 @@
     vm_exists: "{{ vm_info.msg is not search('does not exist') }}"
   tags:
     - start_vm
+    - poweroff
+
 # Step 3: Debug VM existence status
 - name: Debug VM existence status
   debug:
@@ -91,6 +94,7 @@
   when: vm_exists
   tags:
     - start_vm
+    - poweroff
 
 # Step 12: Debug VM status if it exists
 - name: Debug VM status if it exists
@@ -101,6 +105,7 @@
   when: vm_exists
   tags:
     - start_vm
+    - poweroff
 
 # Step 13: Start the VM if it is stopped and exists
 - name: Start the VM if it is stopped
@@ -175,3 +180,28 @@
     - vm_running_status.status is defined
     - vm_running_status.status == 'running'
     - lvm_update_needed | default(true)
+
+# Step 19: Include afterclone.yml
+- name: Run tasks on the VM if needed
+  block:
+    - name: Include afterclone.yml
+      include_tasks: afterclone.yml
+  delegate_to: "{{ IP_ADDRESS }}"  # Delegate the entire block to the VM
+  when:
+    - vm_exists
+    - vm_running_status is defined
+    - vm_running_status.status is defined
+    - vm_running_status.status == 'running'
+    - lvm_update_needed | default(true)
+
+- name: Stop the VM if it's running
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    vmid: "{{ vm_status.vmid }}"
+    state: stopped
+  when: "'poweroff' in ansible_run_tags"
+  tags:
+    - poweroff

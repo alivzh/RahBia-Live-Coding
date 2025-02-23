@@ -30,3 +30,4 @@
         SSH_USERS: "{{ VM.SSH_USERS }}"
       tags:
         - start_vm
+        - poweroff
