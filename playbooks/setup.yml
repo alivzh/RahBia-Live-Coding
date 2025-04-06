@@ -1,0 +1,49 @@
+- name: install and configuration traefik service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/traefik_setup/defaults/all/main.yml
+    - ../roles/traefik_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/traefik_setup
+
+- name: install and configuration minio service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/minio_setup/defaults/all/main.yml
+    - ../roles/minio_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/minio_setup
+
+- name: install and configuration nexus service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/nexus_setup/defaults/all/main.yml
+    - ../roles/nexus_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/nexus_setup
+
+- name: install and configuration gitlab service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/gitlab_setup/defaults/all/main.yml
+    - ../roles/gitlab_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/gitlab_setup
+
+- name: install and configuration gitlab runner service
+  hosts: rahbia-runner
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/runner_setup/defaults/all/main.yml
+    - ../roles/runner_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/runner_setup

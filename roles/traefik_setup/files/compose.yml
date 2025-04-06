@@ -71,12 +71,12 @@ services:
       # HTTP Router
       - "traefik.http.routers.http-khodesh.rule=Host(`${TRAEFIK_DOMAIN}`)" # Match the host for HTTP traffic
       - "traefik.http.routers.http-khodesh.entrypoints=web" # Route HTTP traffic to the web entry point
-      - "traefik.http.routers.khodesh.middlewares=auth@docker" # HTTP auth
+      - "traefik.http.routers.http-khodesh.middlewares=auth@docker" # HTTPS auth
 
       # HTTPS Router
       - "traefik.http.routers.khodesh.rule=Host(`${TRAEFIK_DOMAIN}`)" # Match the host for HTTPS traffic
       - "traefik.http.routers.khodesh.tls=true" # Enable TLS for this router
+      - "traefik.http.routers.khodesh.middlewares=auth@docker" # HTTP auth
       - "traefik.http.routers.khodesh.entrypoints=web-secure" # Route HTTPS traffic to the web-secure entry point
-      - "traefik.http.routers.http-khodesh.middlewares=auth@docker" # HTTPS auth
       - "traefik.http.routers.khodesh.tls.certresolver=myresolver" # Use the DNS challenge resolver for HTTPS
       - "traefik.http.services.khodesh.loadBalancer.server.port=8080" # Default backend port for the service

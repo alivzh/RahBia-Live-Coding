@@ -24,7 +24,7 @@ services:
     volumes:
       - minio_data:/data
     environment:
-      MINIO_ROOT_USER: "${MINIO_ROOT_USER}" # Root username for MinIO
+      MINIO_ROOT_USER: "${MINIO_ROOT_USERNAME}" # Root username for MinIO
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}" # Root password for MinIO
       MINIO_SERVER_URL: http://${MINIO_API_DOMAIN} # API domain
       NUBUI_BROWSER_REDIRECT_URL: http://${MINIO_CONSOLE_DOMAIN} # Console redirect URL

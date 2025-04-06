@@ -31,6 +31,3 @@ WEB_AUTH_PASS: "{{ WEB_AUTH_PASS }}"
 # echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
 #
 # Also note that dollar signs should NOT be doubled when they not evaluated (e.g. Ansible docker_container module).
-
-
-
