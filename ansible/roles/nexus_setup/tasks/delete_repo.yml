@@ -1,0 +1,22 @@
+---
+- name: Check if the repository exists
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/{{ item }}"
+    method: GET
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: 200
+  register: repo_check_response
+  failed_when: false
+  ignore_errors: true
+
+- name: Delete the repository if it exists
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/{{ item }}"
+    method: DELETE
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: 204
+  when: repo_check_response.status == 200

@@ -1,0 +1,150 @@
+---
+# main project directory
+project_dir: /opt/services
+# nexus project directory
+service_dir: "{{ project_dir }}/nexus"
+
+# nexus image tag
+NEXUS_IMAGE_TAG: 3.77.1
+
+# restart policy
+NEXUS_RESTART_POLICY: always
+
+# nexus domain
+MAIN_DOMAIN: aliveland.ir
+NEXUS_MAIN_DOMAIN: "repo.{{ MAIN_DOMAIN }}"
+LOCAL_NEXUS_MAIN_DOMAIN: "{{ NEXUS_MAIN_DOMAIN }}.local"
+NEXUS_MAIN_URL: "https://{{ NEXUS_MAIN_DOMAIN }}"
+
+ROLE:
+  id: repo_admin
+  name: repo_admin
+  description: repository_admin
+  privileges: nx-repository-admin-*-*-*
+  roles: nx-anonymous
+
+USER:
+  id: repo
+  first_name: repo
+  last_name: repo
+  email_address: repo@aliveland.ir
+  status: active
+  roles_name: repo_admin
+
+ANONYMOUS_CONFIG:
+  enabled: true
+  userId: anonymous
+  realmName: NexusAuthorizingRealm
+
+DELETE_REPOSITORY:
+  - maven-snapshots
+  - maven-central
+  - maven-public
+  - nuget-hosted
+  - maven-releases
+  - nuget-group
+  - nuget.org-proxy
+
+CREATE_BLOB:
+  - apt
+  - docker
+  - raw
+
+CREATE_APT_REPOSITORY:
+  - name: "ubuntu"
+    remote_url: "http://archive.ubuntu.com/ubuntu"
+    distribution: "jammy,jammy-updates,jammy-backports,focal"
+    blob: "apt"
+    cleanup_policy: "docker"
+
+  - name: "ubuntu-docker"
+    remote_url: "https://download.docker.com/linux/ubuntu"
+    distribution: "jammy"
+    blob: "apt"
+    cleanup_policy: "docker"
+
+  - name: "ubuntu-security"
+    remote_url: "http://security.ubuntu.com/ubuntu"
+    distribution: "jammy-security"
+    blob: "apt"
+    cleanup_policy: "docker"
+
+  - name: "debian-docker"
+    remote_url: "https://download.docker.com/linux/debian/"
+    distribution: "bookworm"
+    blob: "apt"
+    cleanup_policy: "docker"
+
+  - name: "debian-security"
+    remote_url: "https://security.debian.org"
+    distribution: "bookworm-security"
+    blob: "apt"
+    cleanup_policy: "docker"
+
+  - name: "debian"
+    remote_url: "https://deb.debian.org/debian"
+    distribution: "bookworm,bookworm-backports,bookworm-updates"
+    blob: "apt"
+    cleanup_policy: "docker"
+
+CREATE_DOCKER_REPOSITORY:
+  - name: "hub"
+    blob: "docker"
+    cleanup_policy: "docker"
+    remote_url: "https://hub.hamdocker.ir"
+    repo_port: "9091"
+    index_type: "HUB"
+    repo_domain: "hub.{{ MAIN_DOMAIN }}"
+
+  - name: "quay"
+    blob: "docker"
+    cleanup_policy: "docker"
+    remote_url: "https://quay.io"
+    repo_port: "9092"
+    index_type: "REGISTRY"
+    repo_domain: quay.{{ MAIN_DOMAIN }}
+
+  - name: "k8s"
+    blob: "docker"
+    cleanup_policy: "docker"
+    remote_url: "https://registry.k8s.io"
+    repo_port: "9093"
+    index_type: "REGISTRY"
+    repo_domain: k8s.{{ MAIN_DOMAIN }}
+
+  - name: "gcr"
+    blob: "docker"
+    cleanup_policy: "docker"
+    remote_url: "https://gcr.io"
+    repo_port: "9094"
+    index_type: "REGISTRY"
+    repo_domain: gcr.{{ MAIN_DOMAIN }}
+
+  - name: "k8s-gcr"
+    blob: "docker"
+    cleanup_policy: "docker"
+    remote_url: "https://k8s.gcr.io"
+    repo_port: "9095"
+    index_type: "REGISTRY"
+    repo_domain: k8s-gcr.{{ MAIN_DOMAIN }}
+
+  - name: "github"
+    blob: "docker"
+    cleanup_policy: "docker"
+    remote_url: "https://ghcr.io"
+    repo_port: "9096"
+    index_type: "REGISTRY"
+    repo_domain: github.{{ MAIN_DOMAIN }}
+
+CREATE_RAW_REPOSITORY:
+  - name: "kube"
+    blob: "raw"
+    cleanup_policy: "raw"
+    remote_url: "https://files.m.daocloud.io"
+    content_disposition: "INLINE"
+
+CREATE_PYPI_REPOSITORY:
+  - name: "pypi"
+    blob: "raw"
+    cleanup_policy: "pypi"
+    remote_url: "https://pypi.org/"

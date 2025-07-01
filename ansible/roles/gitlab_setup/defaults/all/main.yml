@@ -1,0 +1,39 @@
+---
+# main project directory
+project_dir: /opt/services
+# gitlab project directory
+service_dir: "{{ project_dir }}/gitlab"
+# gitlab backup directory
+backups_dir: "{{ project_dir }}/backup"
+
+# restart policy
+GITLAB_RESTART_POLICY: unless-stopped
+
+# gitlab image tag
+GITLAB_IMAGE_TAG: 17.7.0-ce.0
+
+# gitlab domain
+MAIN_DOMAIN: aliveland.ir
+GITLAB_DOMAIN: "git.{{ MAIN_DOMAIN }}"
+GITLAB_REGISTRY_DOMAIN: "gitreg.{{ MAIN_DOMAIN }}"
+LOCAL_GITLAB_DOMAIN: "{{ GITLAB_DOMAIN }}.local"
+LOCAL_GITLAB_REGISTRY_DOMAIN: "{{ GITLAB_REGISTRY_DOMAIN }}.local"
+# gitlab root access
+GITLAB_ROOT_PASS: "{{ GITLAB_ROOT_PASS }}"
+# openssl rand -base64 30
+
+# Gitlab gmail email config
+SMTP_USERNAME:  "{{ SMTP_USERNAME }}"
+SMTP_PASSWORD:  "{{ SMTP_PASSWORD }}"
+
+# Gitlab S3 bucket setting
+MINIO_API_ENDPOINT: https://minioapi.aliveland.ir
+MINIO_GITLAB_BACKUP_BUCKET: "{{ MINIO_GITLAB_BACKUP_BUCKET }}"
+MINIO_GITLAB_BACKUP_USERNAME: "{{ MINIO_GITLAB_BACKUP_USERNAME }}"
+MINIO_GITLAB_BACKUP_PASSWORD: "{{ MINIO_GITLAB_BACKUP_PASSWORD }}"
+
+MINIO_ROOT_USERNAME: "{{ MINIO_ROOT_USERNAME }}"
+MINIO_ROOT_PASSWORD: "{{ MINIO_ROOT_PASSWORD }}"
+
+# Gitlab config backup encryption passphrase
+GITLAB_BACKUP_ENCRYPTION_PASSWORD: "{{ GITLAB_BACKUP_ENCRYPTION_PASSWORD }}"

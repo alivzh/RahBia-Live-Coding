@@ -1,0 +1,122 @@
+- name: Get all VM details
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    name: "{{ MACHINE_NAME }}"
+    state: current
+  register: vm_info
+  failed_when: false
+  changed_when: false
+
+- name: Debug all VM details
+  debug:
+    var: vm_info
+
+- name: Verify if VM exists
+  set_fact:
+    vm_exists: "{{ vm_info.msg is not search('does not exist') }}"
+
+- name: Extract VM ID by VM name
+  set_fact:
+    vmid: "{{ vm_info.vmid }}"
+  when: vm_exists
+
+- name: Debug extracted VM ID
+  debug:
+    msg: "Extracted VM ID: {{ vmid }}"
+
+- name: Fail if VM does not exist
+  fail:
+    msg: "VM '{{ MACHINE_NAME }}' does not exist on node '{{ PROXMOX_NODE }}'."
+  when: not vm_exists
+
+- name: Stop the VM if it's running
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    vmid: "{{ vmid }}"
+    state: stopped
+    force: yes
+  when: vm_exists
+
+- name: Kill any process using the VM's logical volume
+  shell: "fuser -vm /dev/{{ PROXMOX_LVM_VOLUME_GROUP }}/vm-{{ vmid }}-disk-* || echo 'No processes using this disk'"
+  register: fuser_check
+  become: true
+
+- name: Debug process check
+  debug:
+    var: fuser_check.stdout
+
+- name: Kill process if found using the disk
+  shell: "kill -9 {{ fuser_check.stdout | regex_search('[0-9]+') }}"
+  when: "'No processes using this disk' not in fuser_check.stdout"
+  become: true
+
+- name: Ensure logical volume is no longer in use
+  shell: "lvchange -an /dev/{{ PROXMOX_LVM_VOLUME_GROUP }}/vm-{{ vmid }}-disk-*"
+  become: true
+  when: vm_exists
+
+
+
+
+- name: List all logical volumes related to the VM
+  shell: >
+    lvdisplay /dev/{{ PROXMOX_LVM_VOLUME_GROUP }}/vm-{{ vmid }}-disk-* | grep "LV Name"
+  register: lv_list
+  become: true
+  failed_when: false
+
+- name: Debug list of volumes to remove
+  debug:
+    var: lv_list.stdout_lines
+
+- name: Force remove unused logical volumes related to the VM
+  shell: lvremove -y --force /dev/{{ PROXMOX_LVM_VOLUME_GROUP }}/vm-{{ vmid }}-disk-*
+  when: lv_list.stdout_lines | length > 0
+  become: true
+  ignore_errors: true
+
+
+
+  
+
+- name: Delete the VM by VMID
+  community.general.proxmox_kvm:
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    api_host: "{{ PROXMOX_HOST }}"
+    validate_certs: false
+    vmid: "{{ vmid }}"
+    node: "{{ PROXMOX_NODE }}"
+    state: absent
+  when: vm_exists
+
+- name: Remove unused volumes related to the VM
+  shell: "lvremove -y /dev/{{ PROXMOX_LVM_VOLUME_GROUP }}/vm-{{ vmid }}-disk-*"
+  when: vm_exists
+  become: true
+  failed_when: false
+
+- name: Check if VM configuration file exists
+  stat:
+    path: "/etc/pve/qemu-server/{{ vmid }}.conf"
+  register: vm_config_file
+  become: true
+
+- name: Remove orphaned VM configuration file
+  file:
+    path: "/etc/pve/qemu-server/{{ vmid }}.conf"
+    state: absent
+  when: vm_exists and vm_config_file.stat.exists
+  become: true
+
+- name: Debug cleanup status
+  debug:
+    msg: "All resources (VM configuration, disks, volumes, etc.) for VM '{{ MACHINE_NAME }}' (VMID: {{ vmid }}) have been removed successfully."
+  when: vm_exists

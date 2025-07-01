@@ -1,0 +1,69 @@
+---
+- name: Check if the repository exists | docker repository
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/docker/proxy/{{ item.name }}"
+    method: GET
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: 200
+  register: repo_check_response
+  ignore_errors: true
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_docker_repo
+
+- name: Create Docker proxy repositories
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/docker/proxy"
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    method: POST
+    force_basic_auth: yes
+    status_code: 201
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    body: >-
+      {
+        "name": "{{ item.name }}",
+        "online": true,
+        "storage": {
+          "blobStoreName": "{{ item.blob }}",
+          "strictContentTypeValidation": true
+        },
+        "cleanup": {
+          "policyNames": [
+            "{{ item.cleanup_policy }}"
+          ]
+        },
+        "proxy": {
+          "remoteUrl": "{{ item.remote_url }}",
+          "contentMaxAge": 1440,
+          "metadataMaxAge": 1440
+        },
+        "negativeCache": {
+          "enabled": true,
+          "timeToLive": 1440
+        },
+        "httpClient": {
+          "blocked": false,
+          "autoBlock": false,
+        },
+        "docker": {
+          "v1Enabled": true,
+          "forceBasicAuth": false,
+          "httpPort": "{{ item.repo_port }}",
+          "httpsPort": "",
+          "subdomain": "docker-a"
+        },
+        "dockerProxy": {
+          "indexType": "{{ item.index_type}}",
+        }
+      }
+  when: repo_check_response.status != 200
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_docker_repo

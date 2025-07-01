@@ -1,0 +1,69 @@
+---
+- name: Check if the repository exists
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/{{ item.name }}"
+    method: GET
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: 200
+  register: repo_check_response
+  failed_when: false
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_apt_repo
+
+- name: Create APT proxy repositories
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/apt/proxy"
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    method: POST
+    force_basic_auth: yes
+    status_code: 201
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    body: >-
+      {
+        "name": "{{ item.name }}",
+        "online": true,
+        "storage": {
+          "blobStoreName": "{{ item.blob }}",
+          "strictContentTypeValidation": true
+        },
+        "cleanup": {
+          "policyNames": ["{{ item.cleanup_policy }}"]
+        },
+        "apt": {
+          "distribution": "{{ item.distribution }}",
+          "flat": true
+        },
+        "proxy": {
+          "remoteUrl": "{{ item.remote_url }}",
+          "contentMaxAge": 1440,
+          "metadataMaxAge": 1440
+        },
+        "negativeCache": {
+          "enabled": true,
+          "timeToLive": 1440
+        },
+        "httpClient": {
+          "blocked": false,
+          "autoBlock": false,
+          "connection": {
+            "retries": "",
+            "userAgentSuffix": "",
+            "timeout": "",
+            "enableCircularRedirects": false,
+            "enableCookies": false
+          }
+        },
+        "routingRule": "string"
+      }
+  when: repo_check_response.status != 200
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_apt_repo

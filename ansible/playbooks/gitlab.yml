@@ -1,0 +1,10 @@
+- name: install and configuration gitlab service
+  hosts: rahbia-services
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/gitlab_setup/defaults/all/main.yml
+    - ../roles/gitlab_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/gitlab_setup
+

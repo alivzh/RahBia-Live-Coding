@@ -1,0 +1,4 @@
+- name: Change hostname using hostnamectl
+  ansible.builtin.command:
+    cmd: hostnamectl set-hostname "{{ MACHINE_NAME }}"
+  become: yes

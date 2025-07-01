@@ -1,0 +1,6 @@
+---
+- name: Configure network settings for the VM
+  command: |
+    qm set {{ cloned_vm.vmid }} --net0 virtio,bridge=vmbr0,macaddr={{ MAC_ADDRESS }}
+  when: cloned_vm is defined and cloned_vm.vmid is defined
+  

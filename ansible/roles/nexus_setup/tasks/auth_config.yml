@@ -1,0 +1,106 @@
+---
+- name: Check role list
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/security/roles"
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    method: GET
+    force_basic_auth: yes
+    status_code: 200
+  register: role_check_response
+  ignore_errors: true
+  tags:
+    - setup_nexus
+    - config_nexus
+    - auth_config
+
+- name: Debug role "{{ ROLE.id }}" if exist
+  debug:
+    msg: "{{ role_check_response.json }}"
+  when: role_check_response.json | selectattr('id', 'equalto', "{{ ROLE.id }}") | list | length == 0
+  tags:
+    - setup_nexus
+    - config_nexus
+    - auth_config
+
+- name: Create "{{ ROLE.id }}" role
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/security/roles"
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    method: POST
+    force_basic_auth: yes
+    status_code: 200
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    body: >-
+      {
+        "id": "{{ ROLE.id }}",
+        "name": "{{ ROLE.name }}",
+        "description": "{{ ROLE.description }}",
+        "privileges": [
+          "{{ ROLE.privileges }}"
+        ],
+        "roles": [
+          "{{ ROLE.roles }}"
+        ]
+      }
+  when: role_check_response.json | selectattr('id', 'equalto', "{{ ROLE.id }}") | list | length == 0
+  tags:
+    - setup_nexus
+    - config_nexus
+    - auth_config
+
+- name: Check if the User exists
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/security/users"
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    method: GET
+    force_basic_auth: yes
+    status_code: 200
+  register: user_check_response
+  ignore_errors: true
+  tags:
+    - setup_nexus
+    - config_nexus
+    - auth_config
+
+- name: Debug user repo if found
+  debug:
+    msg: "{{ user_check_response.json }}"
+  when: user_check_response.json | selectattr('userId', 'equalto', "{{ USER.id }}") | list | length == 0
+  tags:
+    - setup_nexus
+    - config_nexus
+    - auth_config
+
+- name: Create User
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/security/users"
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    method: POST
+    force_basic_auth: yes
+    status_code: 200
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    body: >-
+      {
+        "userId": "{{ USER.id }}",
+        "firstName": "{{ USER.first_name }}",
+        "lastName": "{{ USER.last_name }}",
+        "emailAddress": "{{ USER.email_address }}",
+        "password": "{{ OTHER_USER_PASSWORD }}",
+        "status": "{{ USER.status }}",
+        "roles": [
+          "{{ USER.roles_name }}"
+        ]
+      }
+  when: user_check_response.json | selectattr('userId', 'equalto', "{{ USER.id }}") | list | length == 0
+  tags:
+    - setup_nexus
+    - config_nexus
+    - auth_config

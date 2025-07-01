@@ -1,0 +1,9 @@
+- name: install and configuration gitlab runner service
+  hosts: rahbia-runner
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../roles/runner_setup/defaults/all/main.yml
+    - ../roles/runner_setup/defaults/all/vault.yml
+  roles:
+    - ../roles/runner_setup

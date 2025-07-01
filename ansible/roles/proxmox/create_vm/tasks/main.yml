@@ -1,0 +1,214 @@
+---
+# Step 1: Check if the VM already exists
+- name: Check if the VM already exists
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    name: "{{ MACHINE_NAME }}"
+    state: current
+  register: vm_info
+  failed_when: false
+  changed_when: false
+  tags:
+    - start_vm
+    - poweroff
+
+# Step 2: Verify if VM exists based on the result
+- name: Verify if VM exists
+  set_fact:
+    vm_exists: "{{ vm_info.msg is not search('does not exist') }}"
+  tags:
+    - start_vm
+    - poweroff
+
+# Step 3: Debug VM existence status
+- name: Debug VM existence status
+  debug:
+    msg:
+      - "VM exists: {{ vm_exists }}"
+      - "VM info: {{ vm_info }}"
+
+# Step 4: Create the VM if it does not exist
+- name: Create or clone the VM if it does not exist
+  include_tasks: create_vm.yml
+  when: not vm_exists
+
+# Step 5: Add a short delay to ensure VM is registered in Proxmox
+- name: Wait for Proxmox to register the VM
+  wait_for:
+    timeout: 30
+  when: not vm_exists
+
+# Step 6: Recheck if the VM now exists after creation
+- name: Recheck VM existence after creation
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    name: "{{ MACHINE_NAME }}"
+    state: current
+  register: vm_info_after_creation
+  failed_when: false
+  changed_when: false
+  when: not vm_exists
+
+# Step 7: Verify if VM exists after creation
+- name: Verify if VM exists after creation
+  set_fact:
+    vm_exists: "{{ vm_info_after_creation.msg is not search('does not exist') }}"
+  when: not vm_exists
+
+# Step 8: Debug VM existence status after creation
+- name: Debug VM existence status after creation
+  debug:
+    msg:
+      - "VM exists after creation: {{ vm_exists }}"
+      - "VM info after creation: {{ vm_info_after_creation }}"
+  when: not vm_exists
+
+# Step 9: Include update_network_config.yml if VM exists
+- name: Include update_network_config.yml
+  include_tasks: update_network_config.yml
+  when: vm_exists
+
+# Step 10: Include update_server_config.yml if VM exists
+- name: Include update_server_config.yml
+  include_tasks: update_server_config.yml
+  when: vm_exists
+
+# Step 11: Fetch the status of the VM if it exists
+- name: Fetch the status of the VM
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    name: "{{ MACHINE_NAME }}"
+    state: current
+  register: vm_status
+  failed_when: false
+  changed_when: false
+  when: vm_exists
+  tags:
+    - start_vm
+    - poweroff
+
+# Step 12: Debug VM status if it exists
+- name: Debug VM status if it exists
+  debug:
+    msg:
+      - "VM current status: {{ vm_status.status if vm_status.status is defined else 'N/A' }}"
+      - "Full VM status: {{ vm_status }}"
+  when: vm_exists
+  tags:
+    - start_vm
+    - poweroff
+
+# Step 13: Start the VM if it is stopped and exists
+- name: Start the VM if it is stopped
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    name: "{{ MACHINE_NAME }}"
+    state: started
+  when:
+    - vm_exists
+    - vm_status.status == 'stopped'
+  tags:
+    - start_vm
+
+# Step 14: Fetch the running status of the VM for debugging
+- name: Fetch the running status of the VM
+  community.general.proxmox_kvm:
+    api_host: "{{ PROXMOX_HOST }}"
+    api_user: "{{ PROXMOX_USERNAME }}"
+    api_password: "{{ PROXMOX_PASSWORD }}"
+    node: "{{ PROXMOX_NODE }}"
+    name: "{{ MACHINE_NAME }}"
+    state: current
+  register: vm_running_status
+  until: "'status' in vm_running_status and vm_running_status.status == 'running'"
+  retries: 60
+  delay: 20
+
+# Step 15: Debug VM running status
+- name: Debug VM running status
+  debug:
+    msg:
+      - "VM running status: {{ vm_running_status.status if vm_running_status.status is defined else 'No status available' }}"
+      - "Full VM running status: {{ vm_running_status }}"
+
+# Step 16: Debug VM running status after waiting
+- name: Debug VM running status after waiting
+  debug:
+    msg:
+      - "VM running status after wait: {{ vm_running_status.status if vm_running_status.status is defined else 'No status available' }}"
+      - "Full VM running status: {{ vm_running_status }}"
+  when: vm_exists
+
+
+
+# Step 17: Include update_lvm.yml
+- name: Run tasks on the VM if needed
+  block:
+    - name: Include update_lvm.yml
+      include_tasks: update_lvm.yml
+  delegate_to: "{{ IP_ADDRESS }}"  # Delegate the entire block to the VM
+  when:
+    - vm_exists
+    - vm_running_status is defined
+    - vm_running_status.status is defined
+    - vm_running_status.status == 'running'
+    - lvm_update_needed | default(true)
+
+
+
+# Step 18: Include update_ssh_config.yml
+- name: Run tasks on the VM if needed
+  block:
+    - name: Include update_ssh_config.yml
+      include_tasks: update_ssh_config.yml
+  delegate_to: "{{ IP_ADDRESS }}"  # Delegate the entire block to the VM
+  when:
+    - vm_exists
+    - vm_running_status is defined
+    - vm_running_status.status is defined
+    - vm_running_status.status == 'running'
+    - lvm_update_needed | default(true)
+
+# Step 19: Include afterclone.yml
+- name: Run tasks on the VM if needed
+  block:
+    - name: Include afterclone.yml
+      include_tasks: afterclone.yml
+  delegate_to: "{{ IP_ADDRESS }}"  # Delegate the entire block to the VM
+  when:
+    - vm_exists
+    - vm_running_status is defined
+    - vm_running_status.status is defined
+    - vm_running_status.status == 'running'
+    - lvm_update_needed | default(true)
+
+# PowerOff
+- name: Gracefully power off VM (Proxmox → SSH fallback)
+  block:
+    - name: Try graceful ACPI shutdown via Proxmox API
+      community.general.proxmox_kvm:
+        api_host: "{{ PROXMOX_HOST }}"
+        api_user: "{{ PROXMOX_USERNAME }}"
+        api_password: "{{ PROXMOX_PASSWORD }}"
+        node: "{{ PROXMOX_NODE }}"
+        vmid: "{{ vm_status.vmid }}"
+        state: stopped
+        timeout: 30
+      register: acpi_shutdown
+      failed_when: false
+      tags: [poweroff]
+
+  when: "'poweroff' in ansible_run_tags"
+  tags: [poweroff]

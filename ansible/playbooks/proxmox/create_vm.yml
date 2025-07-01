@@ -1,0 +1,33 @@
+---
+- name: Create VMs
+  become: true
+  gather_facts: yes
+  vars_files:
+    - ../../roles/proxmox/group_vars/all/main.yml
+    - ../../roles/proxmox/group_vars/all/vault.yml
+  hosts: proxmox
+
+  tasks:
+    - name: Create VM for each entry in VMS list
+      include_role:
+        name: ../../roles/proxmox/create_vm
+      loop: "{{ VMS }}"
+      loop_control:
+        loop_var: VM
+      vars:
+        MACHINE_NAME: "{{ VM.NAME }}"
+        VM_TAG: "{{ VM.TAG }}"
+        CLONE_TEMPLATE: "{{ VM.CLONE_TEMPLATE }}"
+        FULL_CLONE: "{{ VM.FULL_CLONE }}"
+        START_ON_BOOT: "{{ VM.START_ON_BOOT }}"
+        CPU_CORES: "{{ VM.CPU_CORES }}"
+        MEMORY: "{{ VM.MEMORY }}"
+        DISK_SIZE: "{{ VM.DISK_SIZE }}G"
+        NETWORK_INTERFACE_MODEL:  "{{ VM.NETWORK_INTERFACE_MODEL }}"
+        NETWORK_BRIDGE: "{{ VM.NETWORK_BRIDGE }}"
+        MAC_ADDRESS:  "{{ VM.MAC_ADDRESS }}"
+        IP_ADDRESS: "{{ VM.IP_ADDRESS }}"
+        SSH_USERS: "{{ VM.SSH_USERS }}"
+      tags:
+        - start_vm
+        - poweroff

@@ -1,0 +1,154 @@
+########| VE NODE CONFIGS |########
+PROXMOX_USERNAME: "root@pam"
+PROXMOX_PASSWORD: "{{ PROXMOX_ROOT_PASSWORD }}" # ansible-vault
+PROXMOX_HOST: "10.0.0.200"
+PROXMOX_NODE: "pve"
+PROXMOX_STORAGE: "local-lvm"
+PROXMOX_FORMAT: "qcow2"
+PROXMOX_TIMEOUT: 500
+PROXMOX_LVM_VOLUME_GROUP: "pve"
+
+########| Global disk and network settings |########
+DISK_STORAGE: "{{ PROXMOX_STORAGE }}"
+DISK_FORMAT: "{{ PROXMOX_FORMAT }}"
+DISK_TYPE: "scsi"
+NETWORK_INTERFACE_MODEL: "virtio"
+NETWORK_BRIDGE: "vmbr0"
+
+########| Template configs |########
+LVM_VOLUME_GROUP: "vg0"
+LVM_GROUP_ROOT: "root" # %20 OF DISK
+LVM_GROUP_VAR: "var" # 80% OF DISK
+
+########| VM list with configuration for each VM |########
+# NOTE! Storage should be more than the template storage
+VMS:
+  - NAME: "rahbia-services"
+    TAG: "services"
+    CLONE_TEMPLATE: "RahBia-Template"
+    MEMORY: 4096 # MB
+    CPU_CORES: 4
+    MAC_ADDRESS: "00:00:00:00:02:01"
+    DISK_SIZE: 100 # GB
+    START_ON_BOOT: true
+    FULL_CLONE: true
+    IP_ADDRESS: "rahbia-services"
+    SSH_USERS:
+      - username: "root"
+        home: "/root"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+      - username: "alivegamer0099"
+        home: "/home/alivegamer0099"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+
+  - NAME: "rahbia-runner"
+    TAG: "services"
+    CLONE_TEMPLATE: "RahBia-Template"
+    MEMORY: 2048 # MB
+    CPU_CORES: 2
+    MAC_ADDRESS: "00:00:00:00:02:02"
+    DISK_SIZE: 30 # GB
+    START_ON_BOOT: true
+    FULL_CLONE: true
+    IP_ADDRESS: "rahbia-runner"
+    SSH_USERS:
+      - username: "root"
+        home: "/root"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+      - username: "alivegamer0099"
+        home: "/home/alivegamer0099"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+
+    TAG: "app"
+    CLONE_TEMPLATE: "RahBia-Template"
+    MEMORY: 4096 # MB
+    CPU_CORES: 4
+    MAC_ADDRESS: "00:00:00:00:02:03"
+    DISK_SIZE: 30 # GB
+    START_ON_BOOT: true
+    FULL_CLONE: true
+    IP_ADDRESS: "rahbia-voting-app"
+    SSH_USERS:
+      - username: "root"
+        home: "/root"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+      - username: "alivegamer0099"
+        home: "/home/alivegamer0099"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+
+  - NAME: "rahbia-development"
+    TAG: "app"
+    CLONE_TEMPLATE: "RahBia-Template"
+    MEMORY: 4096 # MB
+    CPU_CORES: 4
+    MAC_ADDRESS: "00:00:00:00:02:04"
+    DISK_SIZE: 30 # GB
+    START_ON_BOOT: true
+    FULL_CLONE: true
+    IP_ADDRESS: "rahbia-development"
+    SSH_USERS:
+      - username: "root"
+        home: "/root"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+      - username: "alivegamer0099"
+        home: "/home/alivegamer0099"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+
+  - NAME: "rahbia-production"
+    TAG: "app"
+    CLONE_TEMPLATE: "RahBia-Template"
+    MEMORY: 4096 # MB
+    CPU_CORES: 4
+    MAC_ADDRESS: "00:00:00:00:02:05"
+    DISK_SIZE: 30 # GB
+    START_ON_BOOT: true
+    FULL_CLONE: true
+    IP_ADDRESS: "rahbia-production"
+    SSH_USERS:
+      - username: "root"
+        home: "/root"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+      - username: "alivegamer0099"
+        home: "/home/alivegamer0099"
+        authorized_keys:
+          - "{{ root_alivelandhq_SSH_KEY }}"
+          - "{{ alivz_alienware_SSH_KEY }}"
+          - "{{ alivegamer0099_alivelandhq_SSH_KEY }}"
+          - "{{ root_pve_SSH_KEY }}"
+

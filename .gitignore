@@ -1,0 +1,4 @@
+./ansible/gitlab.rb
+./ansible/vault_pass
+./todo.list
+./docs.sh

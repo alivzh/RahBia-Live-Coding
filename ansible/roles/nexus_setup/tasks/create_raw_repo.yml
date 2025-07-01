@@ -1,0 +1,62 @@
+---
+- name: Check if the repository exists | raw repository
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/raw/proxy/{{ item.name }}"
+    method: GET
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: 200
+  register: raw_repo_check_response
+  ignore_errors: true
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_raw_repo
+
+- name: Create Raw proxy repositories
+  uri:
+    url: "{{ NEXUS_MAIN_URL }}/service/rest/v1/repositories/raw/proxy"
+    user: "{{ NEXUS_USERNAME }}"
+    password: "{{ NEXUS_PASSWORD }}"
+    method: POST
+    force_basic_auth: yes
+    status_code: 201
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    body: >-
+      {
+        "name": "{{ item.name }}",
+        "online": true,
+        "storage": {
+          "blobStoreName": "{{ item.blob }}",
+          "strictContentTypeValidation": true
+        },
+        "cleanup": {
+          "policyNames": [
+            "{{ item.cleanup_policy }}"
+          ]
+        },
+        "proxy": {
+          "remoteUrl": "{{ item.remote_url }}",
+          "contentMaxAge": 1440,
+          "metadataMaxAge": 1440
+        },
+        "negativeCache": {
+          "enabled": true,
+          "timeToLive": 1440
+        },
+        "httpClient": {
+          "blocked": false,
+          "autoBlock": false,
+        },
+        "raw": {
+          "contentDisposition": "{{ item.content_disposition }}"
+        }
+      }
+  when: raw_repo_check_response.status != 200
+  tags:
+    - setup_nexus
+    - config_nexus
+    - create_raw_repo
